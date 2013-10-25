@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Configurate!</title>
+</head>
+<body>
+{% from "_formhelpers.html" import render_field %}
+<form method="post" action="/register">
+  <dl>
+    {{ render_field(form.group_name) }}
+    {{ render_field(form.xmpp_host) }}
+    {{ render_field(form.ip_base) }}
+    {{ render_field(form.ip_netmask) }}
+    {{ render_field(form.machine_count) }}
+    {{ render_field(form.end_to_end_security) }}
+  </dl>
+  <p><input type="submit" value="Submit">
+</form>
+</body>
+</html>
