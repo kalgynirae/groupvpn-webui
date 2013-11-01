@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block body %}
+<h2>Entered data:</h2>
+<dl>
+  <dt>Group name
+  <dd>{{ form.group_name.data }}
+  <dt>XMPP host
+  <dd>{{ form.xmpp_host.data }}
+  <dt>IP base
+  <dd>{{ form.ip_base.data }}
+  <dt>IP netmask
+  <dd>{{ form.ip_netmask.data }}
+  <dt>Number of machines
+  <dd>{{ form.machine_count.data }}
+  <dt>End-to-end security
+  <dd>{{ form.end_to_end_security.data }}
+</dl>
+<h2>Configuration files:</h2>
+{% for config in configs %}
+<h3><code>{{ config.filename }}</code></h3>
+<pre><code>
+{{ config.data }}
+</code></pre>
+{% endfor %}
+{% endblock %}
