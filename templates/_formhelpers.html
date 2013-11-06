@@ -9,5 +9,8 @@
   {% endfor %}
   </ul>
 {% endif %}
+{% if field.description %}
+  <p>{{ field.description }}</p>
+{% endif %}
 </li>
 {% endmacro %}
