@@ -1,6 +1,7 @@
 import json
 import math
 import random
+import re
 import string
 
 from flask import Flask, redirect, render_template, request, url_for
@@ -83,7 +84,7 @@ def make_configs(group_name, xmpp_host, ip_network,
     ips = iter(ip_network.hosts())
     configs = []
     for n in range(1, machine_count + 1):
-        username = username_template.format(n)
+        username = re.sub(r'\W+', '_', username_template.format(n).lower())
         password = ''.join(random.choice(PASSWORD_CHARS)
                            for _ in range(PASSWORD_LENGTH))
         data = {
