@@ -74,7 +74,7 @@ def make_configs(group_name, xmpp_host, ip_network,
             'ip': str(next(ips)),
         }
         configs.append({'filename': "{}.json".format(username),
-                        'data': json.dumps(data, indent=4)})
+                        'data': json.dumps(data, indent=4) + '\n'})
     return configs
 
 app = Flask(__name__)
@@ -82,20 +82,17 @@ app.jinja_env.trim_blocks = True
 app.jinja_env.keep_trailing_newline = True
 
 @app.route('/', methods=['GET'])
-def home():
-    return redirect(url_for('configurate'))
-
-@app.route('/configurate', methods=['GET', 'POST'])
 def configurate():
-    form = ConfigurationForm(request.form)
-    if request.method == 'POST' and form.validate():
+    form = ConfigurationForm(request.args)
+    if request.args and form.validate():
         configs = make_configs(form.group_name.data, form.xmpp_host.data,
                                form.ip_network.data,
                                form.machine_count.data,
                                form.end_to_end_security.data)
-        return render_template('success.html', form=form, configs=configs)
-    return render_template('configuration.html', form=form,
-                           post_url=url_for('configurate'))
+    else:
+        configs = None
+    return render_template('configuration.html', form=form, configs=configs,
+                           action_url=url_for('configurate'))
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% from "_formhelpers.html" import render_field %}
 {% block body %}
-<form method=post action="{{ post_url }}">
+<form method=get action="{{ action_url }}">
   <ul class=form>
     {{ render_field(form.group_name) }}
     {{ render_field(form.xmpp_host) }}
@@ -11,4 +11,11 @@
   </ul>
   <p><input type=submit value="Submit">
 </form>
+{% if configs %}
+<h2>Configuration files:</h2>
+{% for config in configs %}
+<h3><code>{{ config.filename }}</code></h3>
+<pre><code>{{ config.data }}</code></pre>
+{% endfor %}
+{% endif %}
 {% endblock %}

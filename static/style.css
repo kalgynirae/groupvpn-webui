@@ -1,5 +1,16 @@
+body {
+    margin: 0.5rem;
+}
 p {
     margin: 0.5em 0;
+}
+h1, h2, h3 {
+    margin: 0.5em 0;
+}
+pre {
+    background-color: #e0e0e0;
+    margin: 0 -0.5rem;
+    padding: 0 0.5rem;
 }
 
 ul.form {
