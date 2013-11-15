@@ -49,7 +49,7 @@ class ConfigurationForm(w.Form):
                 self.validate_enough_addresses())
 
     def validate_enough_addresses(self):
-        available_addresses = len(list(self.ip_network.data.hosts()))
+        available_addresses = self.ip_network.data.num_addresses
         if available_addresses >= self.machine_count.data:
             return True
         else:
