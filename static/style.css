@@ -1,27 +1,56 @@
+@font-face {
+    font-family: 'droid sans';
+    font-style: normal;
+    font-weight: 400;
+    src: local('droid sans'), local('droidsans'), url(http://fonts.googleapis.com/css?family=droid+sans:400,700|droid+sans+mono);
+}
+@font-face {
+    font-family: 'Droid Sans';
+    font-style: normal;
+    font-weight: 700;
+    src: local('Droid Sans Bold'), local('DroidSans-Bold'), url(http://themes.googleusercontent.com/static/fonts/droidsans/v3/EFpQQyG9GqCrobXxL-KRMQFhaRv2pGgT5Kf0An0s4MM.woff) format('woff');
+}
+@font-face {
+    font-family: 'Droid Sans Mono';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Droid Sans Mono'), local('DroidSansMono'), url(http://themes.googleusercontent.com/static/fonts/droidsansmono/v4/ns-m2xQYezAtqh7ai59hJUYuTAAIFFn5GTWtryCmBQ4.woff) format('woff');
+}
+html {
+    background-color: #e0e0e0;
+    padding: 1.5rem;
+}
 body {
-    margin: 0.5rem;
+    background-color: #fff;
+    border: solid 1px #909090;
+    color: #333;
+    font-family: 'Droid Sans', sans-serif;
+    padding: 1rem;
+}
+h1, h2, h3 {
+    margin: 0;
+    padding: 0.3em 0;
+}
+h1 {
+    color: #204a87;
 }
 p {
     margin: 0.5em 0;
 }
-h1, h2, h3 {
-    margin: 0.5em 0;
-}
 pre {
     background-color: #e0e0e0;
-    margin: 0 -0.5rem;
-    padding: 0 0.5rem;
+    font-family: 'Droid Sans Mono', monospace;
+    margin: 0 -1rem;
+    padding: 0 1rem;
 }
-
 ul.form {
-    border-top: solid 1px #808080;
+    border-top: solid 1px #909090;
     color: #222222;
     padding: 0;
 }
-
 ul.form > li {
     background-color: #e0e0e0;
-    border-bottom: solid 1px #808080;
+    border-bottom: solid 1px #909090;
     margin: 0;
     list-style: none;
     padding: 0.5rem;
@@ -31,7 +60,6 @@ ul.form > li {
 ul.form > li:hover {
     background-color: #eeeeee;
 }
-
 ul.form > li > label {
     display: block;
     position: absolute;
@@ -43,7 +71,6 @@ ul.form > li > label {
     padding: 0.5rem;
     width: 12rem;
 }
-
 ul.form > li.errors {
     background-color: #e09088;
     color: #400000;
