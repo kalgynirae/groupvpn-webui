@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 {% from "_formhelpers.html" import render_field %}
 {% block body %}
-<form method=get action="{{ action_url }}">
+<form method={{ method }} action="{{ action_url }}">
   <ul class=form>
     {{ render_field(form.group_name) }}
-    {{ render_field(form.xmpp_host) }}
+    {{ render_field(form.custom_xmpp_host) }}
     {{ render_field(form.machine_count) }}
     {{ render_field(form.ip_network) }}
     {{ render_field(form.end_to_end_security) }}

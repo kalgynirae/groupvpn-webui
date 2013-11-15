@@ -10,6 +10,7 @@ import wtforms as w
 
 PASSWORD_CHARS = string.ascii_lowercase + string.digits
 PASSWORD_LENGTH = 30
+DEFAULT_XMPP_HOST = 'localhost:9000'
 
 class IPNetworkField(w.Field):
     widget = w.widgets.TextInput()
@@ -35,14 +36,16 @@ class IPNetworkField(w.Field):
 
 class ConfigurationForm(w.Form):
     group_name = w.TextField("Group name", [w.validators.DataRequired()])
-    xmpp_host = w.TextField("XMPP host", [w.validators.DataRequired()])
+    custom_xmpp_host = w.TextField(
+        "Custom XMPP host",
+        description="Leave blank to use our test XMPP server.")
     machine_count = w.IntegerField(
         "Number of machines", [w.validators.NumberRange(min=2)])
     ip_network = IPNetworkField(
         "IP network", default=ipaddress.ip_network(u"192.168.0.0/24"),
         description="Enter the network base address followed by either a "
                     "netmask or a prefix length.")
-    end_to_end_security = w.BooleanField("End-to-end security")
+    end_to_end_security = w.BooleanField("End-to-end security", default=True)
 
     def validate(self):
         return (super(ConfigurationForm, self).validate() and
@@ -57,7 +60,7 @@ class ConfigurationForm(w.Form):
                                           "".format(available_addresses))
             return False
 
-def make_configs(group_name, xmpp_host, ip_network,
+def generate_configs(group_name, xmpp_host, ip_network,
                  machine_count, end_to_end_security):
     max_digits = int(math.log10(machine_count - 1)) + 1
     username_template = "{}{{:0{}}}".format(group_name, max_digits)
@@ -81,18 +84,19 @@ app = Flask(__name__)
 app.jinja_env.trim_blocks = True
 app.jinja_env.keep_trailing_newline = True
 
-@app.route('/', methods=['GET'])
+@app.route('/', methods=['GET', 'POST'])
 def configurate():
-    form = ConfigurationForm(request.args)
-    if request.args and form.validate():
-        configs = make_configs(form.group_name.data, form.xmpp_host.data,
-                               form.ip_network.data,
-                               form.machine_count.data,
-                               form.end_to_end_security.data)
+    form = ConfigurationForm(request.form)
+    if request.method == 'POST' and form.validate():
+        xmpp_host = form.custom_xmpp_host.data or DEFAULT_XMPP_HOST
+        configs = generate_configs(form.group_name.data, xmpp_host,
+                                   form.ip_network.data,
+                                   form.machine_count.data,
+                                   form.end_to_end_security.data)
     else:
         configs = None
     return render_template('configuration.html', form=form, configs=configs,
-                           action_url=url_for('configurate'))
+                           action_url=url_for('configurate'), method='post')
 
 if __name__ == '__main__':
     app.run(debug=True)
