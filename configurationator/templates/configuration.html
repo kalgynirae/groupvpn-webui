@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block body %}
+<form method=post>
+  <ul class=form>
+    {% for field in form %}
+    <li{% if field.errors %} class=errors{% endif %}>
+      {{ field.label_tag }}
+      {{ field }}
+      {{ field.errors }}
+      {% if field.help_text %}
+      <p>{{ field.help_text }}</p>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  <p><input type=submit value=Save>
+</form>
+{% if configs %}
+<h2>Configuration files:</h2>
+{% for config in configs %}
+<h3><code>{{ config.filename }}</code></h3>
+<pre><code>{{ config.data }}</code></pre>
+{% endfor %}
+{% endif %}
+{% endblock %}
