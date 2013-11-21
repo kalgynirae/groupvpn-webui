@@ -3,12 +3,16 @@ import math
 import random
 import re
 import string
+import tempfile
+import zipfile
 
-from flask import Flask, redirect, render_template, request, url_for
+from flask import Flask, redirect, render_template, request, Response, url_for
 import ipaddress
 import wtforms as w
 
-PASSWORD_CHARS = string.ascii_lowercase + string.digits
+GROUP_SALT_CHARS = string.ascii_lowercase + string.digits
+GROUP_SALT_LENGTH = 5
+PASSWORD_CHARS = GROUP_SALT_CHARS
 PASSWORD_LENGTH = 30
 DEFAULT_XMPP_HOST = 'localhost:9000'
 
@@ -60,14 +64,14 @@ class ConfigurationForm(w.Form):
                                           "".format(available_addresses))
             return False
 
-def generate_configs(group_name, xmpp_host, ip_network,
-                 machine_count, end_to_end_security):
-    max_digits = int(math.log10(machine_count - 1)) + 1
-    username_template = "{}{{:0{}}}".format(group_name, max_digits)
+def generate_configs(group_name, xmpp_host, ip_network, machine_count,
+                     end_to_end_security):
+    digits = int(math.log10(machine_count - 1)) + 1
+    username_template = "%s_{:0%d}" % (group_name, digits)
     ips = iter(ip_network.hosts())
     configs = []
     for n in range(1, machine_count + 1):
-        username = re.sub(r'\W+', '_', username_template.format(n).lower())
+        username = username_template.format(n)
         password = ''.join(random.choice(PASSWORD_CHARS)
                            for _ in range(PASSWORD_LENGTH))
         data = {
@@ -80,6 +84,31 @@ def generate_configs(group_name, xmpp_host, ip_network,
                         'data': json.dumps(data, indent=4) + '\n'})
     return configs
 
+def generate_configs_and_zip(form):
+    # Sanitize the group name and add some salt
+    salt = ''.join(random.choice(GROUP_SALT_CHARS)
+                   for _ in range(GROUP_SALT_LENGTH))
+    sanitized = re.sub(r'\W+', '_', form.group_name.data.lower())
+    group_name = '%s_%s' % (sanitized, salt)
+
+    xmpp_host = form.custom_xmpp_host.data or DEFAULT_XMPP_HOST
+
+    configs = generate_configs(group_name, xmpp_host,
+                               form.ip_network.data,
+                               form.machine_count.data,
+                               form.end_to_end_security.data)
+
+    # Assemble the zip file and return a Flask response
+    filename = group_name + '.zip'
+    with tempfile.TemporaryFile() as file:
+        with zipfile.ZipFile(file, 'w') as z:
+            for config in configs:
+                z.writestr(config['filename'], config['data'])
+        file.seek(0)
+        r = Response(file.read(), status=200, mimetype='application/zip')
+        r.headers['Content-Disposition'] = 'attachment; filename=%s' % filename
+        return r
+
 app = Flask(__name__)
 app.jinja_env.trim_blocks = True
 app.jinja_env.keep_trailing_newline = True
@@ -88,14 +117,8 @@ app.jinja_env.keep_trailing_newline = True
 def configurate():
     form = ConfigurationForm(request.form)
     if request.method == 'POST' and form.validate():
-        xmpp_host = form.custom_xmpp_host.data or DEFAULT_XMPP_HOST
-        configs = generate_configs(form.group_name.data, xmpp_host,
-                                   form.ip_network.data,
-                                   form.machine_count.data,
-                                   form.end_to_end_security.data)
-    else:
-        configs = None
-    return render_template('configuration.html', form=form, configs=configs,
+        return generate_configs_and_zip(form)
+    return render_template('configuration.html', form=form,
                            action_url=url_for('configurate'), method='post')
 
 if __name__ == '__main__':
