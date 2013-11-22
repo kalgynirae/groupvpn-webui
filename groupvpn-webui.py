@@ -14,7 +14,7 @@ GROUP_SALT_CHARS = string.ascii_lowercase + string.digits
 GROUP_SALT_LENGTH = 5
 PASSWORD_CHARS = GROUP_SALT_CHARS
 PASSWORD_LENGTH = 30
-DEFAULT_XMPP_HOST = 'localhost:9000'
+XMPP_HOST = 'localhost:9000'
 
 class IPNetworkField(w.Field):
     widget = w.widgets.TextInput()
@@ -40,9 +40,6 @@ class IPNetworkField(w.Field):
 
 class ConfigurationForm(w.Form):
     group_name = w.TextField("Group name", [w.validators.DataRequired()])
-    custom_xmpp_host = w.TextField(
-        "Custom XMPP host",
-        description="Leave blank to use our test XMPP server.")
     machine_count = w.IntegerField(
         "Number of machines", [w.validators.NumberRange(min=2)])
     ip_network = IPNetworkField(
@@ -75,10 +72,11 @@ def generate_configs(group_name, xmpp_host, ip_network, machine_count,
         password = ''.join(random.choice(PASSWORD_CHARS)
                            for _ in range(PASSWORD_LENGTH))
         data = {
+            'ip': str(next(ips)),
             'xmpp_username': username,
             'xmpp_password': password,
             'xmpp_host': xmpp_host,
-            'ip': str(next(ips)),
+            'end_to_end_security': end_to_end_security,
         }
         configs.append({'filename': "{}.json".format(username),
                         'data': json.dumps(data, indent=4) + '\n'})
@@ -91,9 +89,7 @@ def generate_configs_and_zip(form):
     sanitized = re.sub(r'\W+', '_', form.group_name.data.lower())
     group_name = '%s_%s' % (sanitized, salt)
 
-    xmpp_host = form.custom_xmpp_host.data or DEFAULT_XMPP_HOST
-
-    configs = generate_configs(group_name, xmpp_host,
+    configs = generate_configs(group_name, XMPP_HOST,
                                form.ip_network.data,
                                form.machine_count.data,
                                form.end_to_end_security.data)
