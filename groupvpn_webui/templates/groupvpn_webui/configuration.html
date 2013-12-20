@@ -1,9 +1,12 @@
-{% extends "base.html" %}
-{% from "_formhelpers.html" import render_field %}
+{% extends "groupvpn_webui/base.html" %}
 {% block main %}
 <form method={{ method }} action="{% url "configure" %}">
+  {% csrf_token %}
   <ul class=form>
-    {% include "form_fields.html" %}
+    {% if form.non_field_errors %}
+    <li class="errors"><label>Errors:</label>{{ form.non_field_errors }}</li>
+    {% endif %}
+    {% include "groupvpn_webui/form_fields.html" %}
   </ul>
   <p><input type=submit value="Submit">
 </form>

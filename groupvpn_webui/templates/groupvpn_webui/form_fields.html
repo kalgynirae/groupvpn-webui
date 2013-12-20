@@ -1,7 +1,7 @@
 {% for field in form %}
 <li{% if field.errors %} class=errors{% endif %}>
-  {{ field.label }}
-  {{ field(**kwargs)|safe }}
+  {{ field.label_tag }}
+  {{ field }}
 {% if field.errors %}
   <ul>
   {% for error in field.errors %}
