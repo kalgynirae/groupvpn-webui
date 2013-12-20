@@ -50,5 +50,5 @@ class Configuration(models.Model):
 
 class ConfigurationForm(forms.ModelForm):
     model = Configuration
-    fields = ['group_name', 'xmpp_host', 'machine_count', 'ip_network',
+    fields = ['group_name', 'machine_count', 'ip_network',
               'end_to_end_security']

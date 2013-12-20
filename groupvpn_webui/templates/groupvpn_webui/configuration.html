@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% from "_formhelpers.html" import render_field %}
+{% block main %}
+<form method={{ method }} action="{% url "configure" %}">
+  <ul class=form>
+    {% include "form_fields.html" %}
+  </ul>
+  <p><input type=submit value="Submit">
+</form>
+{% endblock %}

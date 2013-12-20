@@ -1,12 +1,14 @@
+{% load static from staticfiles %}
 <!DOCTYPE html>
 <html lang=en>
 <head>
   <title>GroupVPN Web Configurationator</title>
-  <link rel=stylesheet href="{{ url_for('static', filename='style.css') }}">
+  <link rel=stylesheet href="{% static "groupvpn_webui/style.css" %}">
+  {% block extracss %}{% endblock %}
 </head>
 <body>
 <h1>GroupVPN Web Configurationator</h1>
-{% block body %}
+{% block main %}
 {% endblock %}
 </body>
 </html>
