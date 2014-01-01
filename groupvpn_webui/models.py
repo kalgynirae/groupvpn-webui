@@ -7,6 +7,7 @@ import tempfile
 import zipfile
 
 from django import forms
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.db import models
@@ -39,6 +40,7 @@ class IPNetworkField(models.Field):
         return ipn
 
 class Configuration(models.Model):
+    owner = models.ForeignKey(User)
     group_name = models.CharField(max_length=100)
     machine_count = models.IntegerField("number of machines")
     ip_network = IPNetworkField(
@@ -48,7 +50,7 @@ class Configuration(models.Model):
     end_to_end_security = models.BooleanField(blank=True)
 
     def __unicode__(self):
-        return "<Configuration: '%s'>" % self.group_name
+        return "<Configuration: '%s' by %s>" % (self.group_name, self.owner)
 
     def clean(self):
         # We usually can't use the network address or the broadcast address

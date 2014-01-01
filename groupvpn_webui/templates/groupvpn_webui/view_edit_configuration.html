@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 {% block main %}
-<form method={{ method }} action="{% url "configure" %}">
+<h2>Download configuration</h2>
+<button>TODO</button>
+<h2>Edit configuration</h2>
+<form method={{ method }} action="{% url "view_edit_configuration" configuration.id %}">
   {% csrf_token %}
   <ul class=form>
     {% if form.non_field_errors %}

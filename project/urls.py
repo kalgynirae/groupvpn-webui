@@ -8,7 +8,7 @@ urlpatterns = patterns('',
     # url(r'^$', 'project.views.home', name='home'),
     # url(r'^blog/', include('blog.urls')),
 
-    url(r'^$', 'groupvpn_webui.views.configure', name='configure'),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^accounts/', include('registration_email.backends.default.urls')),
+    url(r'^config/', include('groupvpn_webui.urls')),
 )
