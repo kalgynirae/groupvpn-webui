@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block main %}
+<h2>Configurations</h2>
+<ul>
+{% for c in configurations %}
+  <li>{{ c }}</li>
+  {% empty %}
+  <p>no configurations</p>
+{% endfor %}
+</ul>
+{% endblock %}

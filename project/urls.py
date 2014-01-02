@@ -1,6 +1,8 @@
 from django.conf.urls import patterns, include, url
-
 from django.contrib import admin
+from django.core.urlresolvers import reverse
+from django.views.generic.base import RedirectView
+
 admin.autodiscover()
 
 urlpatterns = patterns('',
@@ -8,6 +10,7 @@ urlpatterns = patterns('',
     # url(r'^$', 'project.views.home', name='home'),
     # url(r'^blog/', include('blog.urls')),
 
+    url(r'^$', RedirectView.as_view(url='/config/')),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^accounts/', include('registration_email.backends.default.urls')),
     url(r'^config/', include('groupvpn_webui.urls')),

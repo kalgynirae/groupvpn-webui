@@ -16,7 +16,7 @@ Install dependencies:
 
 Change the secret key in the django settings file:
 
-    $ vim project/project/settings.py
+    $ vim project/settings.py
 
 Create the database:
 

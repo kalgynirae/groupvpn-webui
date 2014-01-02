@@ -17,6 +17,7 @@ def list_configurations(request):
     configs = Configuration.objects.get(owner=request.user)
     context = {'configurations': configs}
     return render(request, 'groupvpn_webui/list_configurations.html', context)
+
 def view_edit_configuration(request, id):
     c = maybe_get_config(id, request.user)
     context = {'configuration': c}
