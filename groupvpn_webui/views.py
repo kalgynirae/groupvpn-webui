@@ -7,20 +7,38 @@ from .models import Configuration, ConfigurationForm, LimitedConfigurationForm
 
 def maybe_get_config(id, user):
     """Return the Configuration or cause Django to serve a 403 or 404."""
-    c = get_object_or_404(Configuration, id=id)
-    if c.owner == user:
-        return c
-    else:
+    c = get_object_or_404(Configuration, pk=id)
+    if c.owner and c.owner != user:
         raise PermissionDenied
+    else:
+        return c
 
 def list_configurations(request):
-    configs = Configuration.objects.get(owner=request.user)
+    configs = Configuration.objects.filter(owner__exact=request.user.pk)
     context = {'configurations': configs}
     return render(request, 'groupvpn_webui/list_configurations.html', context)
 
 def view_edit_configuration(request, id):
     c = maybe_get_config(id, request.user)
-    context = {'configuration': c}
+    _, filename = c.get_zipped_configs()
+
+    if request.user.is_authenticated():
+        form_class = ConfigurationForm
+    else:
+        form_class = LimitedConfigurationForm
+
+    if request.method == 'POST':
+        form = form_class(request.POST, instance=c)
+        if form.is_valid():
+            if request.user.is_authenticated():
+                form.instance.owner = request.user
+            form.save()
+            return redirect(form.instance)
+    else:
+        form = form_class(instance=c)
+
+    context = {'configuration': c, 'form': form, 'method': 'post',
+               'filename': filename}
     return render(request, 'groupvpn_webui/view_edit_configuration.html',
                   context)
 
@@ -40,7 +58,10 @@ def create_configuration(request):
     if request.method == 'POST':
         form = form_class(request.POST)
         if form.is_valid():
-            pass
+            if request.user.is_authenticated():
+                form.instance.owner = request.user
+            form.save()
+            return redirect(form.instance)
     else:
         form = form_class()
     context = {'form': form, 'method': 'post'}

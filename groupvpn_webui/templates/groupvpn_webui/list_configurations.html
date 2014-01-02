@@ -1,11 +1,15 @@
 {% extends "base.html" %}
 {% block main %}
 <h2>Configurations</h2>
-<ul>
-{% for c in configurations %}
-  <li>{{ c }}</li>
-  {% empty %}
-  <p>no configurations</p>
-{% endfor %}
-</ul>
+{% if user.is_authenticated %}
+  <ul>
+  {% for c in configurations %}
+    <li>{{ c }}</li>
+    {% empty %}
+    <p>no configurations</p>
+  {% endfor %}
+  </ul>
+{% else %}
+<p>Please log in to see your configurations.</p>
+{% endif %}
 {% endblock %}

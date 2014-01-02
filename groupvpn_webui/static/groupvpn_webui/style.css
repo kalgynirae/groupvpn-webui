@@ -34,6 +34,21 @@ h1, h2, h3 {
 h1 {
     color: #204a87;
 }
+nav {
+    border-top: solid 1px #909090;
+    border-bottom: solid 1px #909090;
+}
+nav a {
+    display: inline-block;
+    line-height: 1.5;
+    padding: 0.5em;
+}
+a {
+    color: #204a87;
+}
+a:hover {
+    background-color: #c0e0ff;
+}
 p {
     margin: 0.5em 0;
 }
