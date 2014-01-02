@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block main %}
+{% if not user.is_authenticated %}
+  <h2>Bookmark this page</h2>
+  <p>Since you are not logged in, please bookmark this page if you want to
+  return to it later.</p>
+{% endif %}
+<h2>Download configuration</h2>
+<p><a href="{% url "download_configuration" configuration.pk %}">{{ filename }}</a>
+<h2>Edit configuration</h2>
+<form method={{ method }} action="{% url "view_edit_configuration" configuration.pk %}">
+  {% csrf_token %}
+  <ul class=form>
+    {% if form.non_field_errors %}
+    <li class="errors"><label>Errors:</label>{{ form.non_field_errors }}</li>
+    {% endif %}
+    {% include "groupvpn_webui/form_fields.html" %}
+  </ul>
+  <p><input type=submit value="Submit">
+</form>
+{% endblock %}

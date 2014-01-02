@@ -1,7 +1,7 @@
-{% macro render_field(field) %}
+{% for field in form %}
 <li{% if field.errors %} class=errors{% endif %}>
-  {{ field.label }}
-  {{ field(**kwargs)|safe }}
+  {{ field.label_tag }}
+  {{ field }}
 {% if field.errors %}
   <ul>
   {% for error in field.errors %}
@@ -13,4 +13,4 @@
   <p>{{ field.description }}</p>
 {% endif %}
 </li>
-{% endmacro %}
+{% endfor %}

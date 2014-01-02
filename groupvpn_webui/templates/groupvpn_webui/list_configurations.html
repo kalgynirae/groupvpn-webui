@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block main %}
+<h2>Configurations</h2>
+{% if user.is_authenticated %}
+  <ul>
+  {% for c in configurations %}
+  <li><a href="{{ c.get_absolute_url }}">{{ c.group_name }}
+    ({{ c.machine_count }} machines)</a></li>
+  {% empty %}
+    <p>no configurations</p>
+  {% endfor %}
+  </ul>
+{% else %}
+<p>Please log in to see your configurations.</p>
+{% endif %}
+{% endblock %}

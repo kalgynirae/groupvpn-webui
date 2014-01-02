@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block main %}
+<h2>Create configuration</h2>
+<form method={{ method }} action="{% url "create_configuration" %}">
+  {% csrf_token %}
+  <ul class=form>
+    {% if form.non_field_errors %}
+    <li class="errors"><label>Errors:</label>{{ form.non_field_errors }}</li>
+    {% endif %}
+    {% include "groupvpn_webui/form_fields.html" %}
+  </ul>
+  <p><input type=submit value="Submit">
+</form>
+{% endblock %}
