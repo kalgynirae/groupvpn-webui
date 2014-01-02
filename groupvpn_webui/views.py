@@ -7,6 +7,7 @@ from .models import Configuration, ConfigurationForm, LimitedConfigurationForm
 
 def maybe_get_config(id, user):
     """Return the Configuration or cause Django to serve a 403 or 404."""
+    print(id)
     c = get_object_or_404(Configuration, pk=id)
     if c.owner and c.owner != user:
         raise PermissionDenied
@@ -37,6 +38,10 @@ def view_edit_configuration(request, id):
     else:
         form = form_class(instance=c)
 
+    # We want the group_name to be read-only simply because changing the
+    # group_name is confusing to the average user. It could still be changed by
+    # submitting a faulty form, but that's not a problem.
+    form.fields['group_name'].widget.attrs['readonly'] = True
     context = {'configuration': c, 'form': form, 'method': 'post',
                'filename': filename}
     return render(request, 'groupvpn_webui/view_edit_configuration.html',

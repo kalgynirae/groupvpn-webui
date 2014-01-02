@@ -4,8 +4,9 @@
 {% if user.is_authenticated %}
   <ul>
   {% for c in configurations %}
-    <li>{{ c }}</li>
-    {% empty %}
+  <li><a href="{{ c.get_absolute_url }}">{{ c.group_name }}
+    ({{ c.machine_count }} machines)</a></li>
+  {% empty %}
     <p>no configurations</p>
   {% endfor %}
   </ul>

@@ -1,5 +1,10 @@
 {% extends "base.html" %}
 {% block main %}
+{% if not user.is_authenticated %}
+  <h2>Bookmark this page</h2>
+  <p>Since you are not logged in, please bookmark this page if you want to
+  return to it later.</p>
+{% endif %}
 <h2>Download configuration</h2>
 <p><a href="{% url "download_configuration" configuration.pk %}">{{ filename }}</a>
 <h2>Edit configuration</h2>

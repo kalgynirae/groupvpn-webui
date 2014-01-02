@@ -10,6 +10,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
+from django.core.validators import RegexValidator
 from django.db import models
 import ipaddress
 
@@ -43,7 +44,9 @@ class IPNetworkField(models.CharField):
 
 class Configuration(models.Model):
     owner = models.ForeignKey(User, null=True)
-    group_name = models.CharField(max_length=100, primary_key=True)
+    group_name = models.CharField(
+        max_length=100, primary_key=True,
+        validators=[RegexValidator(r'^\w+$', "Must match the regex '\w+'")])
     machine_count = models.IntegerField("number of machines")
     ip_network = IPNetworkField(
         default="172.31.0.0/24",
