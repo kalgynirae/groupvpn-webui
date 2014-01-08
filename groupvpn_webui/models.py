@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import json
 import math
 import random
@@ -6,7 +7,6 @@ import string
 import tempfile
 import zipfile
 
-from django import forms
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
@@ -14,33 +14,11 @@ from django.core.validators import RegexValidator
 from django.db import models
 import ipaddress
 
-GROUP_SALT_CHARS = string.ascii_lowercase + string.digits
-GROUP_SALT_LENGTH = 0
-PASSWORD_CHARS = GROUP_SALT_CHARS
+from .util import IPNetworkField, random_string_maker
+
+PASSWORD_CHARS = string.ascii_lowercase + string.digits
 PASSWORD_LENGTH = 30
 XMPP_HOST = 'localhost:9000'
-
-class IPNetworkField(models.CharField):
-    __metaclass__ = models.SubfieldBase
-    description = "A network of IP addresses"
-
-    def __init__(self, *args, **kwargs):
-        kwargs['max_length'] = 50
-        super(IPNetworkField, self).__init__(*args, **kwargs)
-        # Remove the MaxLength validator that CharField.__init__ adds
-        self.validators.pop()
-
-    def get_prep_value(self, value):
-        return str(value)
-
-    def to_python(self, value):
-        if isinstance(value, (ipaddress.IPv4Network, ipaddress.IPv6Network)):
-            return value
-        try:
-            ipn = ipaddress.ip_network(value)
-        except ValueError as e:
-            raise ValidationError(e)
-        return ipn
 
 class Configuration(models.Model):
     owner = models.ForeignKey(User, null=True)
@@ -53,6 +31,9 @@ class Configuration(models.Model):
         help_text="Enter the network base address followed by either a "
                   "netmask or a prefix length.")
     end_to_end_security = models.BooleanField(blank=True)
+    random_seed = models.CharField(
+        max_length=20,
+        default=random_string_maker(20))
 
     def __unicode__(self):
         return "<Configuration: '%s' by %s>" % (self.group_name, self.owner)
@@ -70,13 +51,15 @@ class Configuration(models.Model):
         return reverse('view_edit_configuration', args=[self.pk])
 
     def generate_configs(self):
+        rnd = random.Random()
+        rnd.seed(self.random_seed)
         digits = int(math.log10(max(1, self.machine_count - 1))) + 1
         username_template = "%s_{:0%d}" % (self.group_name, digits)
         ips = iter(self.ip_network.hosts())
         configs = []
         for n in range(1, self.machine_count + 1):
             username = username_template.format(n)
-            password = ''.join(random.choice(PASSWORD_CHARS)
+            password = ''.join(rnd.choice(PASSWORD_CHARS)
                                for _ in range(PASSWORD_LENGTH))
             data = {
                 'ip': str(next(ips)),
@@ -90,31 +73,14 @@ class Configuration(models.Model):
         return configs
 
     def get_zipped_configs(self):
-        # Sanitize the group name and add some salt
-        salt = ''.join(random.choice(GROUP_SALT_CHARS)
-                       for _ in range(GROUP_SALT_LENGTH))
-        sanitized = re.sub(r'\W+', '_', self.group_name.lower())
-        group_name = '%s_%s' % (sanitized, salt) if salt else sanitized
-
-        configs = self.generate_configs()
-
         # Assemble the zip file and return a response object
-        filename = group_name + '.zip'
+        filename = self.group_name + '.zip'
         with tempfile.TemporaryFile() as file:
             with zipfile.ZipFile(file, 'w') as z:
-                for config in configs:
+                for config in self.generate_configs():
                     z.writestr(config['filename'], config['data'])
             file.seek(0)
             return file.read(), filename
 
-class ConfigurationForm(forms.ModelForm):
-    class Meta:
-        model = Configuration
-        fields = ['group_name', 'machine_count', 'ip_network',
-                  'end_to_end_security']
-
-class LimitedConfigurationForm(ConfigurationForm):
-    machine_count = forms.IntegerField(
-        max_value=2,
-        error_messages={'max_value': "Must be less than or equal to 2 (log in "
-                                     "to allow higher)."})
+    def setup_ejabberd(self):
+        pass

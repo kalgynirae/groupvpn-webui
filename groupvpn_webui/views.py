@@ -3,7 +3,8 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 import ipaddress
 
-from .models import Configuration, ConfigurationForm, LimitedConfigurationForm
+from .forms import ConfigurationForm, LimitedConfigurationForm
+from .models import Configuration
 
 def maybe_get_config(id, user):
     """Return the Configuration or cause Django to serve a 403 or 404."""
