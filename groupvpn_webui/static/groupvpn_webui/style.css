@@ -26,6 +26,7 @@ body {
     color: #333;
     font-family: 'Droid Sans', sans-serif;
     padding: 1rem;
+    padding-top: 0;
 }
 h1, h2, h3 {
     margin: 0;
@@ -33,6 +34,7 @@ h1, h2, h3 {
 }
 h1 {
     color: #204a87;
+    padding-bottom: 0;
 }
 nav {
     border-top: solid 1px #909090;
