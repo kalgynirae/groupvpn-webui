@@ -1,3 +1,6 @@
+import subprocess
+
+from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -21,7 +24,6 @@ def list_configurations(request):
 
 def view_edit_configuration(request, id):
     c = maybe_get_config(id, request.user)
-    _, filename = c.get_zipped_configs()
 
     if request.user.is_authenticated():
         form_class = ConfigurationForm
@@ -43,13 +45,26 @@ def view_edit_configuration(request, id):
     # submitting a faulty form, but that's not a problem.
     form.fields['group_name'].widget.attrs['readonly'] = True
     context = {'configuration': c, 'form': form, 'method': 'post',
-               'filename': filename}
+               'filename': c.group_name + '.zip'}
     return render(request, 'groupvpn_webui/view_edit_configuration.html',
                   context)
 
 def download_configuration(request, id):
     c = maybe_get_config(id, request.user)
-    zipped_configs, filename = c.get_zipped_configs()
+    filename = c.group_name + '.zip'
+    # Make a copy (slice of all elements) so we don't modify the original
+    args = settings.GROUPVPN_CONFIG_ARGS[:]
+    args.extend([
+        c.group_name,
+        settings.GROUPVPN_XMPP_HOST,
+        str(c.machine_count),
+        '--ip-network',
+        str(c.ip_network),
+        '--seed',
+        c.random_seed])
+    if not c.end_to_end_security:
+        args.append('--no-security')
+    zipped_configs = subprocess.check_output(args)
     response = HttpResponse(zipped_configs, content_type='application/zip')
     response['Content-Disposition'] = 'attachment; filename=%s' % filename
     return response

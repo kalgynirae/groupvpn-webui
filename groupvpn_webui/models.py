@@ -1,13 +1,5 @@
 from __future__ import absolute_import
-import json
-import math
-import random
-import re
-import subprocess
-import tempfile
-import zipfile
 
-from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
@@ -46,11 +38,3 @@ class Configuration(models.Model):
 
     def get_absolute_url(self):
         return reverse('view_edit_configuration', args=[self.pk])
-
-    def get_zipped_configs(self):
-        filename = self.group_name + '.zip'
-        args = ['gvpn-config.py', self.group_name, str(self.machine_count),
-                str(self.ip_network), self.xmpp_host, '--password-length',
-                settings.GROUPVPN_PASSWORD_LENGTH, '--seed', self.random_seed]
-        output = subprocess.check_output(args)
-        return output, filename
