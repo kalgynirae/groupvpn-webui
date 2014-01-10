@@ -8,7 +8,6 @@ from .models import Configuration
 
 def maybe_get_config(id, user):
     """Return the Configuration or cause Django to serve a 403 or 404."""
-    print(id)
     c = get_object_or_404(Configuration, pk=id)
     if c.owner and c.owner != user:
         raise PermissionDenied
