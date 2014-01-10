@@ -1,6 +1,8 @@
-#!/usr/bin/python2
+"""Generate configuration files for GroupVPN"""
+from __future__ import print_function
 import argparse
 import io
+import itertools
 import json
 import math
 import random
@@ -13,24 +15,32 @@ import ipaddress
 
 PASSWORD_CHARS = string.ascii_lowercase + string.digits
 
-def ip_network(s):
+def call(command):
+    print('#' if args.dry_run else '', ' '.join(command), file=sys.stderr)
+    if not args.dry_run:
+        subprocess.check_call(command)
+
+def ip_network_from_str(s):
     return ipaddress.ip_network(s.decode())
-parser = argparse.ArgumentParser(description='Configure GroupVPN')
-parser.add_argument('--version', action='version', version='1')
+
+parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('group_name')
 parser.add_argument('xmpp_host')
 parser.add_argument('machine_count', type=int)
-parser.add_argument('--ip-network', type=ip_network, required=False,
-                    default=ipaddress.ip_network(u'172.31.0.0/24'))
+parser.add_argument('--ip-network', type=ip_network_from_str, required=False,
+                    default=ipaddress.ip_network(u'172.31.0.0/24'),
+                    help="IP network for the group (default 172.31.0.0/24)")
+parser.add_argument('--dry-run', action='store_true',
+                    help="Don't issue ejabberd commands (just print them)")
+parser.add_argument('--no-security', dest='security', action='store_false',
+                    help="Don't configure for end-to-end security")
+parser.add_argument('--no-zip', dest='zip', action='store_false',
+                    help="Output plain text instead of a zip archive")
 parser.add_argument('--password-length', default=30, type=int,
                     help="length of generated XMPP passwords (default 30)")
-parser.add_argument('--no-security', dest='security', action='store_false',
-                    help="Don't use end-to-end security")
-parser.add_argument('--no-xmpp-setup', dest='xmpp_setup', action='store_false',
-                    help="Don't set up XMPP accounts")
-parser.add_argument('--no-zip', dest='zip', action='store_false',
-                    help="Don't pack output in a zip archive")
-parser.add_argument('--seed', help="seed for the random number generator")
+parser.add_argument('--seed',
+                    help="Seed the random number generator")
+parser.add_argument('--version', action='version', version='1')
 args = parser.parse_args()
 
 if args.seed:
@@ -40,6 +50,7 @@ digits = int(math.log10(max(1, args.machine_count - 1))) + 1
 ip_network = ipaddress.ip_network(args.ip_network)
 username_template = "%s_{:0%d}" % (args.group_name, digits)
 
+# Generate configuration data
 configs = []
 for n, ip in zip(range(1, args.machine_count + 1), ip_network.hosts()):
     username = username_template.format(n)
@@ -52,22 +63,34 @@ for n, ip in zip(range(1, args.machine_count + 1), ip_network.hosts()):
         'xmpp_host': args.xmpp_host,
         'end_to_end_security': args.security,
     }
-    configs.append({'filename': "%s.json" % username,
-                    'data': json.dumps(data, indent=4) + '\n'})
+    configs.append({'filename': "%s.json" % username, 'data': data})
 
-if args.xmpp_setup:
-    for config in configs:
-        args = ['ejabberdctl', 'register', username, args.xmpp_host, password]
-        subprocess.check_call(args)
-    # TODO: make friendships between users
+# Register users with ejabberd
+for config in configs:
+    command = ['ejabberdctl', 'register', config['data']['xmpp_username'],
+               args.xmpp_host, config['data']['xmpp_password']]
+    call(command)
+
+# Set up friendships between users
+for c1, c2 in itertools.permutations(configs, 2):
+    usernames = [c['data']['xmpp_username'] for c in [c1, c2]]
+    nick = '%s-%s' % tuple(usernames)
+    group = 'groupvpn'
+    subscription = 'both'
+    command = ['ejabberdctl', 'add-rosteritem',
+               usernames[0], args.xmpp_host,
+               usernames[1], args.xmpp_host,
+               nick, group, subscription]
+    call(command)
 
 with io.BytesIO() as b:
     if args.zip:
         with zipfile.ZipFile(b, 'w') as z:
             for config in configs:
-                z.writestr(config['filename'], config['data'])
+                z.writestr(config['filename'],
+                           json.dumps(config['data'], indent=4) + '\n')
     else:
         for config in configs:
-            b.write(config['data'])
+            b.write(json.dumps(config['data'], indent=4) + '\n')
     b.seek(0)
-    print b.read()
+    print(b.read())
