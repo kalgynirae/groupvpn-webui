@@ -1,4 +1,12 @@
-"""Generate configuration files for GroupVPN"""
+"""Generate configuration files for GroupVPN.
+
+This program does two things: it runs the necessary `ejabberdctl` commands to
+set up users for each machine, and it prints to stdout out a zip archive
+containing a configuration file for each machine.
+
+If any error is encountered during the `ejabberdctl` calls, this program will
+exit immediately.
+"""
 from __future__ import print_function
 import argparse
 import io
@@ -15,12 +23,19 @@ import ipaddress
 
 PASSWORD_CHARS = string.ascii_lowercase + string.digits
 
-def call(command):
-    print('#' if args.dry_run else '', ' '.join(command), file=sys.stderr)
+def print_and_call(command):
+    print(('#' if args.dry_run else '') + ' '.join(command), file=sys.stderr)
     if not args.dry_run:
-        subprocess.check_call(command)
+        try:
+            subprocess.check_call(command)
+        except subprocess.CalledProcessError as e:
+            print(e, file=sys.stderr)
+            print("Exiting after ejabberdctl error.", file=sys.stderr)
+            sys.exit(42)
 
 def ip_network_from_str(s):
+    # The ipaddress module only excepts unicode objects, so we have to decode
+    # the string that comes in on the command line.
     return ipaddress.ip_network(s.decode())
 
 parser = argparse.ArgumentParser(description=__doc__)
@@ -69,7 +84,7 @@ for n, ip in zip(range(1, args.machine_count + 1), ip_network.hosts()):
 for config in configs:
     command = ['ejabberdctl', 'register', config['data']['xmpp_username'],
                args.xmpp_host, config['data']['xmpp_password']]
-    call(command)
+    print_and_call(command)
 
 # Set up friendships between users
 for c1, c2 in itertools.permutations(configs, 2):
@@ -81,7 +96,7 @@ for c1, c2 in itertools.permutations(configs, 2):
                usernames[0], args.xmpp_host,
                usernames[1], args.xmpp_host,
                nick, group, subscription]
-    call(command)
+    print_and_call(command)
 
 with io.BytesIO() as b:
     if args.zip:
