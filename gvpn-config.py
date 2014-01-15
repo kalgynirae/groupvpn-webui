@@ -24,8 +24,8 @@ import ipaddress
 PASSWORD_CHARS = string.ascii_lowercase + string.digits
 
 def print_and_call(command):
-    print(('#' if args.dry_run else '') + ' '.join(command), file=sys.stderr)
-    if not args.dry_run:
+    print(('' if args.configure else '#') + ' '.join(command), file=sys.stderr)
+    if args.configure:
         try:
             subprocess.check_call(command)
         except subprocess.CalledProcessError as e:
@@ -42,17 +42,17 @@ parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('group_name')
 parser.add_argument('xmpp_host')
 parser.add_argument('machine_count', type=int)
+parser.add_argument('--configure', action='store_true',
+                    help="Run ejabberdctl commands (default: just print them)")
 parser.add_argument('--ip-network', type=ip_network_from_str, required=False,
                     default=ipaddress.ip_network(u'172.31.0.0/24'),
-                    help="IP network for the group (default 172.31.0.0/24)")
-parser.add_argument('--dry-run', action='store_true',
-                    help="Don't issue ejabberd commands (just print them)")
+                    help="IP network for the group (default: 172.31.0.0/24)")
 parser.add_argument('--no-security', dest='security', action='store_false',
                     help="Don't configure for end-to-end security")
 parser.add_argument('--no-zip', dest='zip', action='store_false',
                     help="Output plain text instead of a zip archive")
 parser.add_argument('--password-length', default=30, type=int,
-                    help="length of generated XMPP passwords (default 30)")
+                    help="length of generated XMPP passwords (default: 30)")
 parser.add_argument('--seed',
                     help="Seed the random number generator")
 parser.add_argument('--version', action='version', version='1')
