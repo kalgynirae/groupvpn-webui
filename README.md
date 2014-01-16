@@ -16,25 +16,27 @@ Obtain the source and set up a virtualenv:
 
     $ git clone https://github.com/kalgynirae/groupvpn-webui.git
     $ cd groupvpn-webui
-    $ virtualenv .
+    $ virtualenv .env
 
 Install dependencies to the virtualenv:
 
-    $ bin/pip install -r requirements.txt
+    $ .env/bin/pip install -e .
 
 Using the command-line tool
 =============================
 
 View help message:
 
-    $ bin/python gvpn-config.py -h
+    $ .env/bin/gvpn-config -h
 
-Generate configuration files and configure ejabberd:
+Generate configuration files for 10 machines:
 
-    $ bin/python gvpn-config.py --configure testgroup localhost:1337 10 > configs.zip
+    $ .env/bin/gvpn-config testgroup localhost:1337 10 > configs.zip
 
 By default `ejabberdctl` commands are printed but not run. The
-`--configure` flag runs them.
+`--configure` flag runs them:
+
+    $ .env/bin/gvpn-config --configure testgroup localhost:1337 10 > configs.zip
 
 Django set-up
 =============
@@ -45,4 +47,4 @@ Change the secret key and disable `DEBUG` in the django settings file:
 
 Create the database:
 
-    $ bin/python manage.py syncdb
+    $ .env/bin/manage.py syncdb
