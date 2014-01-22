@@ -4,13 +4,13 @@ includes a Django-based web interface.
 Dependencies
 ============
 
-*   The Python2 versions of `virtualenv` and `pip` (packages `python-pip` and
+*   The Python2 versions of **virtualenv** and **pip** (packages `python-pip` and
     `python-virtualenv` on Debian)
 
-*   `ejabberd` server already running, with `ejabberdctl` available.
+*   **ejabberd** server already running, with `ejabberdctl` available.
 
-Set-up
-======
+Installation
+============
 
 Obtain the source and set up a virtualenv:
 
@@ -31,12 +31,18 @@ View help message:
 
 Generate configuration files for 10 machines:
 
-    $ .env/bin/gvpn-config testgroup localhost:1337 10 > configs.zip
+    $ .env/bin/gvpn-config testgroup localhost:1337 10 -o configs.zip
 
-By default `ejabberdctl` commands are printed but not run. The
-`--configure` flag runs them:
+By default `ejabberdctl` commands are printed but not run. Use the
+`--configure` flag to actually run them:
 
-    $ .env/bin/gvpn-config --configure testgroup localhost:1337 10 > configs.zip
+    $ .env/bin/gvpn-config --configure testgroup localhost:1337 10 -o configs.zip
+
+Passwords are randomly generated, so if you need to generate the same
+passwords on multiple runs of the tool, you can pass a string to be used
+as a random seed using the `--seed` option:
+
+    $ .env/bin/gvpn-config testgroup localhost 10 --seed kajfslafkslalfj
 
 Django set-up
 =============

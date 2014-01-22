@@ -43,6 +43,8 @@ parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('group_name')
 parser.add_argument('xmpp_host')
 parser.add_argument('machine_count', type=int)
+parser.add_argument('-o', dest='zip', metavar='FILE',
+                    help="Output a zip archive to FILE")
 parser.add_argument('--configure', action='store_true',
                     help="Run ejabberdctl commands (default: just print them)")
 parser.add_argument('--ip-network', type=ip_network_from_str, required=False,
@@ -50,8 +52,6 @@ parser.add_argument('--ip-network', type=ip_network_from_str, required=False,
                     help="IP network for the group (default: 172.31.0.0/24)")
 parser.add_argument('--no-security', dest='security', action='store_false',
                     help="Don't configure for end-to-end security")
-parser.add_argument('--no-zip', dest='zip', action='store_false',
-                    help="Output plain text instead of a zip archive")
 parser.add_argument('--password-length', default=30, type=int,
                     help="length of generated XMPP passwords (default: 30)")
 parser.add_argument('--seed',
@@ -99,14 +99,11 @@ for c1, c2 in itertools.permutations(configs, 2):
                nick, group, subscription]
     print_and_call(command)
 
-with io.BytesIO() as b:
-    if args.zip:
-        with zipfile.ZipFile(b, 'w') as z:
-            for config in configs:
-                z.writestr(config['filename'],
-                           json.dumps(config['data'], indent=4) + '\n')
-    else:
+if args.zip:
+    with zipfile.ZipFile(args.zip, 'w') as z:
         for config in configs:
-            b.write(json.dumps(config['data'], indent=4) + '\n')
-    b.seek(0)
-    print(b.read())
+            z.writestr(config['filename'],
+                       json.dumps(config['data'], indent=4) + '\n')
+else:
+    for config in configs:
+        print(json.dumps(config['data'], indent=4))
