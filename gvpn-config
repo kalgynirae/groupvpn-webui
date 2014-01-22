@@ -43,8 +43,8 @@ parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('group_name')
 parser.add_argument('xmpp_host')
 parser.add_argument('machine_count', type=int)
-parser.add_argument('-o', dest='zip', metavar='FILE',
-                    help="Output a zip archive to FILE")
+parser.add_argument('--zip', action='store_true',
+                    help="Write zipped configurations to stdout")
 parser.add_argument('--configure', action='store_true',
                     help="Run ejabberdctl commands (default: just print them)")
 parser.add_argument('--ip-network', type=ip_network_from_str, required=False,
@@ -100,10 +100,14 @@ for c1, c2 in itertools.permutations(configs, 2):
     print_and_call(command)
 
 if args.zip:
-    with zipfile.ZipFile(args.zip, 'w') as z:
-        for config in configs:
-            z.writestr(config['filename'],
-                       json.dumps(config['data'], indent=4) + '\n')
+    b = io.BytesIO()
+    with io.BytesIO() as b:
+        with zipfile.ZipFile(b, 'w') as z:
+            for config in configs:
+                z.writestr(config['filename'],
+                           json.dumps(config['data'], indent=4) + '\n')
+        b.seek(0)
+        print(b.read())
 else:
     for config in configs:
         print(json.dumps(config['data'], indent=4))

@@ -22,8 +22,10 @@ Install dependencies to the virtualenv:
 
     $ .env/bin/pip install -e .
 
-Using the command-line tool
+Using the `gvpn-config` tool
 =============================
+
+[TODO: general description]
 
 View help message:
 
@@ -31,12 +33,12 @@ View help message:
 
 Generate configuration files for 10 machines:
 
-    $ .env/bin/gvpn-config testgroup localhost:1337 10 -o configs.zip
+    $ .env/bin/gvpn-config testgroup localhost:1337 10 --zip > configs.zip
 
 By default `ejabberdctl` commands are printed but not run. Use the
 `--configure` flag to actually run them:
 
-    $ .env/bin/gvpn-config --configure testgroup localhost:1337 10 -o configs.zip
+    $ .env/bin/gvpn-config --configure testgroup localhost:1337 10 --zip > configs.zip
 
 Passwords are randomly generated, so if you need to generate the same
 passwords on multiple runs of the tool, you can pass a string to be used

@@ -22,9 +22,8 @@ GROUPVPN_XMPP_HOST = 'localhost:9000'
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 GROUPVPN_IP_PREFIX_MINIMUM_LENGTH = 16
-GROUPVPN_CONFIG_ARGS = [os.path.join(BASE_DIR, 'bin/python'),
-                        os.path.join(BASE_DIR, 'gvpn-config.py'),
-                        '--password-length', '30', '--dry-run']
+GROUPVPN_CONFIG_ARGS = [os.path.join(BASE_DIR, '.env/bin/gvpn-config'),
+                        '--password-length', '30', '--zip']
 
 TEMPLATE_DEBUG = DEBUG
 ALLOWED_HOSTS = []
