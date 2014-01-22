@@ -73,10 +73,13 @@ for n, ip in zip(range(1, args.machine_count + 1), ip_network.hosts()):
     password = ''.join(random.choice(PASSWORD_CHARS)
                        for _ in range(args.password_length))
     data = {
-        'ip': str(ip),
+        'ip4': str(ip),
+        'ip4_mask': ip_network.prefixlen,
         'xmpp_username': username,
         'xmpp_password': password,
         'xmpp_host': args.xmpp_host,
+        'tincan_logging': 0,
+        'controller_logging': 'logging.INFO',
         'end_to_end_security': args.security,
     }
     configs.append({'filename': "%s.json" % username, 'data': data})

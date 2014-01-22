@@ -15,6 +15,7 @@ import os
 SECRET_KEY = 'refrigerator'
 DEBUG = True
 GROUPVPN_XMPP_HOST = 'localhost:9000'
+GROUPVPN_MAX_MACHINES = 50
 
 
 
