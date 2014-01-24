@@ -62,8 +62,8 @@ def download_configuration(request, id):
         str(c.ip_network),
         '--seed',
         c.random_seed])
-    if not c.end_to_end_security:
-        args.append('--no-security')
+    if not c.encryption:
+        args.append('--no-encryption')
     zipped_configs = subprocess.check_output(args)
     response = HttpResponse(zipped_configs, content_type='application/zip')
     response['Content-Disposition'] = 'attachment; filename=%s' % filename

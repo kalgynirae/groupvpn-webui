@@ -8,7 +8,7 @@ class ConfigurationForm(forms.ModelForm):
     class Meta:
         model = Configuration
         fields = ['group_name', 'machine_count', 'ip_network',
-                  'end_to_end_security']
+                  'encryption']
 
 class LimitedConfigurationForm(ConfigurationForm):
     machine_count = forms.IntegerField(

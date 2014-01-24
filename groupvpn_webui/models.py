@@ -22,7 +22,7 @@ class Configuration(models.Model):
         default="172.31.0.0/24",
         help_text="Enter the network base address followed by either a "
                   "netmask or a prefix length.")
-    end_to_end_security = models.BooleanField(blank=True)
+    encryption = models.BooleanField(blank=True)
     random_seed = models.CharField(
         max_length=20,
         default=random_string_maker(20))

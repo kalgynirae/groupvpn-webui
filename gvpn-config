@@ -14,6 +14,7 @@ import io
 import itertools
 import json
 import math
+import os.path as path
 import random
 import string
 import subprocess
@@ -50,8 +51,8 @@ parser.add_argument('--configure', action='store_true',
 parser.add_argument('--ip-network', type=ip_network_from_str, required=False,
                     default=ipaddress.ip_network(u'172.31.0.0/24'),
                     help="IP network for the group (default: 172.31.0.0/24)")
-parser.add_argument('--no-security', dest='security', action='store_false',
-                    help="Don't configure for end-to-end security")
+parser.add_argument('--no-encryption', dest='encryption', action='store_false',
+                    help="Don't configure for end-to-end encryption")
 parser.add_argument('--password-length', default=30, type=int,
                     help="length of generated XMPP passwords (default: 30)")
 parser.add_argument('--seed',
@@ -67,21 +68,22 @@ ip_network = ipaddress.ip_network(args.ip_network)
 username_template = "%s_{:0%d}" % (args.group_name, digits)
 
 # Generate configuration data
+with open(path.join(path.dirname(__file__), 'defaults.json')) as f:
+    defaults = json.load(f)
 configs = []
 for n, ip in zip(range(1, args.machine_count + 1), ip_network.hosts()):
     username = username_template.format(n)
     password = ''.join(random.choice(PASSWORD_CHARS)
                        for _ in range(args.password_length))
-    data = {
+    data = defaults.copy()
+    data.update({
         'ip4': str(ip),
         'ip4_mask': ip_network.prefixlen,
         'xmpp_username': username,
         'xmpp_password': password,
         'xmpp_host': args.xmpp_host,
-        'tincan_logging': 0,
-        'controller_logging': 'logging.INFO',
-        'end_to_end_security': args.security,
-    }
+        'sec': args.encryption,
+    })
     configs.append({'filename': "%s.json" % username, 'data': data})
 
 # Register users with ejabberd
