@@ -1,4 +1,0 @@
-django==1.5
-django-registration==1.0
-django-registration-email==0.7.1
-ipaddress==1.0.6

@@ -2,8 +2,8 @@ from setuptools import setup
 import os.path
 
 setup(
-    name="gvpn",
-    packages=['groupvpn_webui', 'project'],
+    name="gvpn-config",
+    packages=["groupvpn_webui", "django_project"],
     install_requires=[
         "Django >=1.5, <1.6",
         "django-registration >=1.0, <1.1",
