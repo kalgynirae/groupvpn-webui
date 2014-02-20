@@ -79,7 +79,8 @@ for n, ip in zip(range(1, args.machine_count + 1), ip_network.hosts()):
     data.update({
         'ip4': str(ip),
         'ip4_mask': ip_network.prefixlen,
-        'xmpp_username': username,
+        'xmpp_username_short': username,
+        'xmpp_username': '%s@%s' % (username, args.xmpp_host),
         'xmpp_password': password,
         'xmpp_host': args.xmpp_host,
         'sec': args.encryption,
@@ -88,13 +89,13 @@ for n, ip in zip(range(1, args.machine_count + 1), ip_network.hosts()):
 
 # Register users with ejabberd
 for config in configs:
-    command = ['ejabberdctl', 'register', config['data']['xmpp_username'],
+    command = ['ejabberdctl', 'register', config['data']['xmpp_username_short'],
                args.xmpp_host, config['data']['xmpp_password']]
     print_and_call(command)
 
 # Set up friendships between users
 for c1, c2 in itertools.permutations(configs, 2):
-    usernames = [c['data']['xmpp_username'] for c in [c1, c2]]
+    usernames = [c['data']['xmpp_username_short'] for c in [c1, c2]]
     nick = '%s-%s' % tuple(usernames)
     group = 'groupvpn'
     subscription = 'both'
