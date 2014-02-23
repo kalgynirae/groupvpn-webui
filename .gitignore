@@ -1,5 +1,5 @@
-bin
-include
-lib
-db.sqlite3
 *.pyc
+ansible/env
+db.sqlite3
+env
+gvpn_config.egg-info
