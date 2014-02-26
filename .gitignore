@@ -3,3 +3,4 @@ ansible/env
 db.sqlite3
 env
 gvpn_config.egg-info
+local_config.py

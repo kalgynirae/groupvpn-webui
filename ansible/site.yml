@@ -33,7 +33,7 @@
       - virtualenv env
       - env/bin/pip install -e .
     - name: Create database
-      command: env/bin/manage.py syncdb chdir=/opt/groupvpn-webui creates=db.sqlite3
+      command: env/bin/manage.py syncdb --noinput chdir=/opt/groupvpn-webui creates=db.sqlite3
   handlers:
     - name: Reload ejabberd
       service: name=ejabberd enabled=yes state=reloaded
