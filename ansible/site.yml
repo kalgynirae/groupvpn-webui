@@ -1,0 +1,39 @@
+---
+- hosts: xmpp.ipop-project.org
+  remote_user: svpnuser
+  sudo: yes
+  tasks:
+    - name: Install Python and friends
+      apt: pkg={{ item }}
+      with_items: [python, python-virtualenv, python-pip]
+    - name: Install ejabberd
+      apt: pkg=ejabberd
+    - name: Configure ejabberd
+      copy: >
+        src=ejabberd.cfg
+        dest=/etc/ejabberd/ejabberd.cfg
+        mode=600
+        owner=ejabberd
+        group=ejabberd
+      notify: Reload ejabberd
+    - name: Copy application files
+      copy: src=../{{ item }} dest=/opt/groupvpn-webui/
+      with_items:
+      - defaults.json
+      - django_project
+      - groupvpn_webui
+      - gvpn-config
+      - manage.py
+      - setup.py
+    - name: Remove existing virtualenv
+      file: path=/opt/groupvpn-webui/env state=absent
+    - name: Initialize virtualenv
+      command: "{{ item }} chdir=/opt/groupvpn-webui"
+      with_items:
+      - virtualenv env
+      - env/bin/pip install -e .
+    - name: Create database
+      command: env/bin/manage.py syncdb --noinput chdir=/opt/groupvpn-webui creates=db.sqlite3
+  handlers:
+    - name: Reload ejabberd
+      service: name=ejabberd enabled=yes state=reloaded

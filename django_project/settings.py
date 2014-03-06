@@ -9,22 +9,25 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 """
 import os
 
-
-
-# IMPORTANT: Change these things before deploying!
-SECRET_KEY = 'refrigerator'
-DEBUG = True
-GROUPVPN_XMPP_HOST = 'localhost:9000'
-GROUPVPN_MAX_MACHINES = 50
-
-
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
+
+DEBUG = False
+GROUPVPN_XMPP_HOST = 'localhost:9000'
+GROUPVPN_MAX_MACHINES = 50
 GROUPVPN_IP_PREFIX_MINIMUM_LENGTH = 16
-GROUPVPN_CONFIG_ARGS = [os.path.join(BASE_DIR, '.env/bin/gvpn-config'),
+GROUPVPN_CONFIG_ARGS = [os.path.join(BASE_DIR, 'env/bin/gvpn-config'),
                         '--password-length', '30', '--zip']
+
+# Import the following from a local configuration file:
+# - SECRET_KEY (see Django docs)
+# - ALLOWED_HOSTS (see Django docs)
+# - DEFAULT_FROM_EMAIL (see Django docs)
+# - EMAIL_* (see Django docs)
+# - GROUPVPN_* overrides
+from .local_config import *
+
 
 TEMPLATE_DEBUG = DEBUG
 ALLOWED_HOSTS = []
