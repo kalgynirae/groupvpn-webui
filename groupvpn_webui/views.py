@@ -55,13 +55,13 @@ def download_configuration(request, id):
     # Make a copy (slice of all elements) so we don't modify the original
     args = settings.GROUPVPN_CONFIG_ARGS[:]
     args.extend([
-        c.group_name,
+        c.group_name.encode('utf-8'),
         settings.GROUPVPN_XMPP_HOST,
         str(c.machine_count),
         '--ip-network',
         str(c.ip_network),
         '--seed',
-        c.random_seed])
+        c.random_seed.encode('utf-8')])
     if not c.encryption:
         args.append('--no-encryption')
     zipped_configs = subprocess.check_output(args)

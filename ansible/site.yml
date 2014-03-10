@@ -3,11 +3,16 @@
   remote_user: svpnuser
   sudo: yes
   tasks:
-    - name: Install Python and friends
+    - name: Install packages
       apt: pkg={{ item }}
-      with_items: [python, python-virtualenv, python-pip, tmux]
-    - name: Install ejabberd
-      apt: pkg=ejabberd
+      with_items:
+      - ejabberd
+      - nginx
+      - python
+      - python-virtualenv
+      - python-pip
+      - tmux
+      - uwsgi
     - name: Configure ejabberd
       copy: >
         src=ejabberd.cfg
@@ -16,16 +21,24 @@
         owner=ejabberd
         group=ejabberd
       notify: Reload ejabberd
-    - name: Install nginx
-      apt: pkg=nginx
+    - name: Disable nginx default configuration
+      file: path=/etc/nginx/sites-enabled/default state=absent
     - name: Configure nginx
       copy: >
-        src=nginx.conf
-        dest=/etc/nginx/conf.d/gvpn-webui.conf
+        src=nginx
+        dest=/etc/nginx/sites-enabled/groupvpn-webui
         mode=644
         owner=root
         group=root
       notify: Reload nginx
+    - name: Configure uwsgi
+      copy: >
+        src=uwsgi
+        dest=/etc/uwsgi/apps-enabled/groupvpn-webui
+        mode=644
+        owner=root
+        group=root
+      notify: Restart uwsgi
     - name: Copy application files
       copy: src=../{{ item }} dest=/opt/groupvpn-webui/
       with_items:
@@ -34,6 +47,10 @@
       - groupvpn_webui
       - gvpn-config
       - manage.py
+      notify:
+      - Run django collectstatic
+      - Kill django dev server in tmux if it's running
+      - Start django dev server in tmux
     - name: Copy setup.py
       copy: src=../setup.py dest=/opt/groupvpn-webui/
       notify:
@@ -41,19 +58,18 @@
       - Initialize virtualenv
     - name: Create database
       command: env/bin/manage.py syncdb --noinput chdir=/opt/groupvpn-webui creates=db.sqlite3
-    - name: Create static directory
-      file: path=/opt/groupvpn-webui/static state=directory
-    - name: Run django collectstatic
-      command: env/bin/manage.py collectstatic --noinput chdir=/opt/groupvpn-webui
-    - name: Kill django dev server in tmux if it's running
-      shell: tmux kill-session -t groupvpn-webui-devserver || true
-    - name: Start django dev server in tmux
-      command: tmux new-session -d -s groupvpn-webui-devserver 'env/bin/manage.py runserver localhost:8080' chdir=/opt/groupvpn-webui
+    - name: Create directories
+      file: path={{ item }} state=directory
+      with_items:
+      - /opt/groupvpn-webui/static
+      - /var/log/groupvpn-webui
   handlers:
     - name: Reload ejabberd
       service: name=ejabberd enabled=yes state=reloaded
     - name: Reload nginx
       service: name=nginx enabled=yes state=reloaded
+    - name: Restart uwsgi
+      service: name=uwsgi enabled=yes state=restarted
     - name: Remove existing virtualenv
       file: path=/opt/groupvpn-webui/env state=absent
     - name: Initialize virtualenv
@@ -61,3 +77,9 @@
       with_items:
       - virtualenv env
       - env/bin/pip install -e .
+    - name: Run django collectstatic
+      command: env/bin/manage.py collectstatic --noinput chdir=/opt/groupvpn-webui
+    - name: Kill django dev server in tmux if it's running
+      shell: tmux kill-session -t groupvpn-webui-devserver || true
+    - name: Start django dev server in tmux
+      command: tmux new-session -d -s groupvpn-webui-devserver 'env/bin/manage.py runfcgi host=localhost port=8080 daemonize=false' chdir=/opt/groupvpn-webui

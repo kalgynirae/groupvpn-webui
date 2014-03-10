@@ -1,12 +1,12 @@
 server {
     listen 80;
     server_name ptony82.dyndns-server.com;
+    access_log /var/log/groupvpn-webui/nginx-access.log;
+    error_log /var/log/groupvpn-webui/nginx-error.log;
 
     location / {
+        include proxy_params;
         proxy_pass http://localhost:8080;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     }
     location /static/ {
         root /opt/groupvpn-webui;

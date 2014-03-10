@@ -9,7 +9,6 @@ setup(
         "django-registration >=1.0, <1.1",
         "django-registration-email >=0.7.1, <0.8",
         "ipaddress >=1.0.6, <1.1",
-        "gunicorn >=18.0, <19.0",
     ],
     scripts=["gvpn-config", "manage.py"],
 )
