@@ -1,13 +1,16 @@
 ---
-- hosts: xmpp.ipop-project.org
+- hosts: ptony82.dyndns-server.com
   remote_user: svpnuser
   sudo: yes
   tasks:
-    - name: Install Python and friends
+    - name: Install packages
       apt: pkg={{ item }}
-      with_items: [python, python-virtualenv, python-pip]
-    - name: Install ejabberd
-      apt: pkg=ejabberd
+      with_items:
+      - ejabberd
+      - python
+      - python-virtualenv
+      - python-pip
+      - tmux
     - name: Configure ejabberd
       copy: >
         src=ejabberd.cfg
@@ -17,14 +20,25 @@
         group=ejabberd
       notify: Reload ejabberd
     - name: Copy application files
-      copy: src=../{{ item }} dest=/opt/groupvpn-webui/
+      copy: src={{ item }} dest=/opt/groupvpn-webui/
       with_items:
-      - defaults.json
-      - django_project
-      - groupvpn_webui
-      - gvpn-config
-      - manage.py
-      - setup.py
+      - ../defaults.json
+      - ../django_project
+      - ../groupvpn_webui
+      - ../gvpn-config
+      - ../manage.py
+      notify:
+      - Run django syncdb
+      - Kill django dev server in tmux if it's running
+      - Start django dev server in tmux
+    - name: Copy setup.py
+      copy: src=../setup.py dest=/opt/groupvpn-webui/
+      notify:
+      - Remove existing virtualenv
+      - Initialize virtualenv
+  handlers:
+    - name: Reload ejabberd
+      service: name=ejabberd enabled=yes state=reloaded
     - name: Remove existing virtualenv
       file: path=/opt/groupvpn-webui/env state=absent
     - name: Initialize virtualenv
@@ -32,8 +46,9 @@
       with_items:
       - virtualenv env
       - env/bin/pip install -e .
-    - name: Create database
-      command: env/bin/manage.py syncdb --noinput chdir=/opt/groupvpn-webui creates=db.sqlite3
-  handlers:
-    - name: Reload ejabberd
-      service: name=ejabberd enabled=yes state=reloaded
+    - name: Run django syncdb
+      command: env/bin/manage.py syncdb --noinput chdir=/opt/groupvpn-webui
+    - name: Kill django dev server in tmux if it's running
+      shell: tmux kill-session -t groupvpn-webui-devserver || true
+    - name: Start django dev server in tmux
+      command: tmux new-session -d -s groupvpn-webui-devserver 'env/bin/manage.py runserver localhost:80' chdir=/opt/groupvpn-webui

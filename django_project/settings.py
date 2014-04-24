@@ -14,6 +14,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 
 DEBUG = False
+DEBUG_PROPAGATE_EXCEPTIONS = True
 GROUPVPN_XMPP_HOST = 'localhost:9000'
 GROUPVPN_MAX_MACHINES = 50
 GROUPVPN_IP_PREFIX_MINIMUM_LENGTH = 16
