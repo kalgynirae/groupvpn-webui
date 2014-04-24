@@ -1,5 +1,4 @@
-A tool for generating configurations for GroupVPN and ejabberd. Also
-includes a Django-based web interface.
+A Django-based web interface for creating GroupVPN configurations.
 
 Dependencies
 ------------
@@ -8,6 +7,11 @@ Dependencies
     `python-pip` and `python-virtualenv` on Debian)
 
 *   **ejabberd** server already running, with `ejabberdctl` available.
+
+*   The [groupvpn-config] script
+
+*   A web server to run the django application in such a way that the
+    application can run `sudo groupvpn-config`
 
 Installation
 ------------
@@ -19,38 +23,10 @@ Obtain the source and set up a virtualenv with the needed dependencies:
     $ virtualenv env
     $ env/bin/pip install -e .
 
-This will install the `gvpn-config` tool and the django `manage.py`
-script to the `.env/bin/` directory, so you can run them like this:
+This will install the django `manage.py` script to the `.env/bin/`
+directory, so you can run it like this:
 
-    $ env/bin/gvpn-config
     $ env/bin/manage.py
-
-Using the `gvpn-config` tool
------------------------------
-
-The `gvpn-config` tool generates GroupVPN configurations for you. It can
-output a zip archive containing the configuration files, and it can set
-up the needed Jabber accounts and relationships for you (but for this to
-work it needs to be able to use the `ejabberdctl` command).
-
-View the help message:
-
-    $ env/bin/gvpn-config --help
-
-Generate configuration files for 10 machines:
-
-    $ env/bin/gvpn-config testgroup localhost:1337 10 --zip > configs.zip
-
-By default, `ejabberdctl` commands are printed but not run. Use the
-`--configure` flag to actually run them:
-
-    $ env/bin/gvpn-config --configure testgroup localhost:1337 10 --zip > configs.zip
-
-Passwords are randomly generated, so if you need to generate the same
-passwords on multiple runs of the tool, you can pass a string to be used
-as a random seed using the `--seed` option:
-
-    $ env/bin/gvpn-config testgroup localhost 10 --seed asdfghjkl
 
 Django set-up
 -------------
@@ -62,3 +38,5 @@ Change the secret key in the django settings file:
 Create the database:
 
     $ env/bin/manage.py syncdb
+
+[groupvpn-config]: https://github.com/kalgynirae/groupvpn-config

@@ -1,5 +1,5 @@
 *.pyc
 db.sqlite3
 env
-gvpn_config.egg-info
+groupvpn_webui.egg-info
 local_config.py
