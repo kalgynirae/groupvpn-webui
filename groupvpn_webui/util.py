@@ -10,10 +10,12 @@ import ipaddress
 DEFAULTS = {
     'arg': 'blarg',
     'GROUPVPN_XMPP_HOST': 'localhost',
-    'GROUPVPN_MAX_MACHINES': 20,
+    'GROUPVPN_MAX_MACHINES': 10, # Note: Don't make this too large, because
+                                 # groupvpn-config currently has to make
+                                 # n^2 calls to ejabberdctl
     'GROUPVPN_IP_PREFIX_MINIMUM_LENGTH': 16,
-    'GROUPVPN_GVPN_CONFIG_PATH': 'gvpn-config',
-    'GROUPVPN_GVPN_CONFIG_ARGS': ['--password-length', '30', '--zip']
+    'GROUPVPN_CONFIG_ARGS': ['sudo', 'groupvpn-config',
+                             '--password-length', '30', '--zip']
 }
 
 class IPNetworkField(models.CharField):

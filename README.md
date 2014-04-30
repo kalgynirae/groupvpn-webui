@@ -1,4 +1,5 @@
-A Django-based web interface for creating GroupVPN configurations.
+A Django app providing a web interface for creating GroupVPN
+configurations.
 
 Dependencies
 ------------
@@ -13,30 +14,26 @@ Dependencies
 *   A web server to run the django application in such a way that the
     application can run `sudo groupvpn-config`
 
+*   Django and the Python 2 backport of Python 3's `ipaddress` module
+    (these can be installed easily using `pip` with the included
+    `setup.py` file)
+
 Installation
 ------------
 
-Obtain the source and set up a virtualenv with the needed dependencies:
+1.  Install dependencies. This repository contains a `setup.py` script
+    that will install the groupvpn_webui application, Django, and the
+    needed ipaddress module. I haven't yet figured out how to run Django
+    properly out of a virtualenv installation, but your mileage may
+    vary.
 
-    $ git clone https://github.com/kalgynirae/groupvpn-webui.git
-    $ cd groupvpn-webui
-    $ virtualenv env
-    $ env/bin/pip install -e .
+2.  Start a new Django project (or modify an existing one) and add
+    `groupvpn_webui` to the INSTALLED_APPS. Configure settings in the
+    project's `settings.py` file if desired (for a list of settings, see
+    the defaults in `util.py`). In particular, if `groupvpn-config` has
+    to be invoked in a special manner, modify `GROUPVPN_CONFIG_ARGS`.
 
-This will install the django `manage.py` script to the `.env/bin/`
-directory, so you can run it like this:
-
-    $ env/bin/manage.py
-
-Django set-up
--------------
-
-Change the secret key in the django settings file:
-
-    $ vim django_project/local_config.py
-
-Create the database:
-
-    $ env/bin/manage.py syncdb
+3.  Configure your web server to serve the Django project, and make sure
+    everything works!
 
 [groupvpn-config]: https://github.com/kalgynirae/groupvpn-config
