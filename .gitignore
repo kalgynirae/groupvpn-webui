@@ -1,5 +1,3 @@
 *.pyc
-db.sqlite3
 env
 groupvpn_webui.egg-info
-local_config.py

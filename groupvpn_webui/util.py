@@ -1,11 +1,20 @@
 from random import randrange
 from string import ascii_lowercase
 
-from django import forms
 from django.conf import settings
+from django import forms
 from django.core.exceptions import ValidationError
 from django.db import models
 import ipaddress
+
+DEFAULTS = {
+    'arg': 'blarg',
+    'GROUPVPN_XMPP_HOST': 'localhost',
+    'GROUPVPN_MAX_MACHINES': 20,
+    'GROUPVPN_IP_PREFIX_MINIMUM_LENGTH': 16,
+    'GROUPVPN_GVPN_CONFIG_PATH': 'gvpn-config',
+    'GROUPVPN_GVPN_CONFIG_ARGS': ['--password-length', '30', '--zip']
+}
 
 class IPNetworkField(models.CharField):
     __metaclass__ = models.SubfieldBase
@@ -39,13 +48,20 @@ class IPNetworkFormField(forms.CharField):
             raise forms.ValidationError(e)
         return ipn
 
+def get_setting(name):
+    if name not in defaults:
+        raise NameError("%s is not a valid setting name" % name)
+    try:
+        return getattr(settings, name)
+    except AttributeError:
+        return DEFAULTS[name]
+
 def random_string_maker(length):
     def random_string():
         return u''.join(unichr(randrange(0xFFFF)) for _ in range(length))
     return random_string
 
 def validate_ip_network_prefix_length(value):
-    if value.prefixlen < settings.GROUPVPN_IP_PREFIX_MINIMUM_LENGTH:
-        raise ValidationError(u"Prefix length must be %d or higher" %
-                              settings.GROUPVPN_IP_PREFIX_MINIMUM_LENGTH)
-
+    min_len = get_setting('GROUPVPN_IP_PREFIX_MINIMUM_LENGTH')
+    if value.prefixlen < min_len:
+        raise ValidationError(u"Prefix length must be %d or higher" % min_len)

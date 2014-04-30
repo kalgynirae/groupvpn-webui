@@ -1,6 +1,5 @@
 from __future__ import absolute_import
 
-from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
@@ -17,7 +16,7 @@ class Configuration(models.Model):
         validators=[RegexValidator(r'^\w+$', "Must match the regex '\w+'")])
     machine_count = models.IntegerField(
         "number of machines",
-        validators=[MaxValueValidator(settings.GROUPVPN_MAX_MACHINES)])
+        validators=[MaxValueValidator(get_setting('GROUPVPN_MAX_MACHINES'))])
     ip_network = IPNetworkField(
         default="172.31.0.0/24",
         help_text="Enter the network base address followed by either a "

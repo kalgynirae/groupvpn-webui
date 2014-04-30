@@ -1,6 +1,5 @@
 import subprocess
 
-from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -8,6 +7,7 @@ import ipaddress
 
 from .forms import ConfigurationForm, LimitedConfigurationForm
 from .models import Configuration
+from .settings import get_setting
 
 def maybe_get_config(id, user):
     """Return the Configuration or cause Django to serve a 403 or 404."""
@@ -53,10 +53,10 @@ def download_configuration(request, id):
     c = maybe_get_config(id, request.user)
     filename = c.group_name + '.zip'
     # Make a copy (slice of all elements) so we don't modify the original
-    args = settings.GROUPVPN_CONFIG_ARGS[:]
+    args = get_setting('GROUPVPN_CONFIG_ARGS')[:]
     args.extend([
         c.group_name.encode('utf-8'),
-        settings.GROUPVPN_XMPP_HOST,
+        get_setting('GROUPVPN_XMPP_HOST'),
         str(c.machine_count),
         '--ip-network',
         str(c.ip_network),
