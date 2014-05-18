@@ -14,8 +14,8 @@ DEFAULTS = {
                                  # groupvpn-config currently has to make
                                  # n^2 calls to ejabberdctl
     'GROUPVPN_IP_PREFIX_MINIMUM_LENGTH': 16,
-    'GROUPVPN_CONFIG_ARGS': ['sudo', 'groupvpn-config',
-                             '--password-length', '30', '--zip']
+    'GROUPVPN_CONFIG_ARGS': ['groupvpn-config', '--password-length', '30',
+                             '--zip']
 }
 
 class IPNetworkField(models.CharField):

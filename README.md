@@ -12,7 +12,7 @@ Dependencies
 *   The [groupvpn-config] script
 
 *   A web server to run the django application in such a way that the
-    application can run `sudo groupvpn-config`
+    application can run `groupvpn-config` with correct permissions
 
 *   Django and the Python 2 backport of Python 3's `ipaddress` module
     (these can be installed easily using `pip` with the included
